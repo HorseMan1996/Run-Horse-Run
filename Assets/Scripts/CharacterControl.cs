@@ -23,6 +23,8 @@ namespace Assets.Scripts
         private Rigidbody _rb;
         private bool _wantsToJump;
         private bool _isGrounded;
+
+        [SerializeField] private Vector3 _characterStartPosition;    
         public static CharacterControl Instance { get; private set; }
         void Awake()
         {
@@ -44,9 +46,24 @@ namespace Assets.Scripts
             }
         }
 
+        private void Start()
+        {
+            GameManager.Instance.EndGameAct += ResetCharacter;
+        }
+
+        private void OnDisable()
+        {
+            GameManager.Instance.EndGameAct -= ResetCharacter;
+        }
+        private void ResetCharacter(bool isWinner)
+        {
+            _rb.linearVelocity = Vector3.zero;
+            transform.position = _characterStartPosition;
+        }
+
         void Update()
         {
-            if (GameManager.Instance.GameState == Assets.Scripts.Enums.GameState.Playing)
+            if (GameManager.Instance.GameState == Enums.GameState.Playing)
             {
                 // input oku
                 if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
@@ -57,13 +74,12 @@ namespace Assets.Scripts
                 // yerde mi?
                 _isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer, QueryTriggerInteraction.Ignore);
 
-                Debug.Log("isGrounded : " + _isGrounded);
             }
         }
 
         void FixedUpdate()
         {
-            if (GameManager.Instance.GameState == Assets.Scripts.Enums.GameState.Playing)
+            if (GameManager.Instance.GameState == Enums.GameState.Playing)
             {
                 // Sürekli sağa doğru hareket
                 Vector3 vel = _rb.linearVelocity;
